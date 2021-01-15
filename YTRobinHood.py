@@ -81,6 +81,7 @@ def download(link):
 
 def upload(yt,options,user,password):
 	if yt != None:
+		tries = 10
 		#Login code 
 		driver = webdriver.Chrome(options=options)
 		driver.get ("https://www.bitchute.com/")
@@ -99,27 +100,37 @@ def upload(yt,options,user,password):
 		uploadButton.click()
 		wait.until(EC.visibility_of_element_located((By.ID,"upload_description")))
 		driver.find_element_by_name("upload_title").send_keys(yt.title)
-		if yt.description !=None:
-			driver.find_element_by_name("upload_description").send_keys(yt.description)
-		#upload video and wait for progess to finish
-		#!!! Find way to go to relative path
-		driver.find_element_by_id("fileupload").send_keys("D:\\coding projects\\YTRobinHood\\downloads\\video.mp4")
-		wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"progress")))
-		print("Uploading video....")
-		uploadWait.until(EC.invisibility_of_element_located((By.CLASS_NAME,"progress")))
-		print("video uploaded!")
-		#upload thumbnal and wait for progess to finish
-		#!!! Find way to go to relative path
-		driver.find_element_by_id("fileupload").send_keys("D:\\coding projects\\YTRobinHood\\downloads\\thumbnail.jpg")
-		wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"progress")))
-		print("Uploading thumbnail....")
-		uploadWait.until(EC.invisibility_of_element_located((By.CLASS_NAME,"progress")))
-		print("thumbnail uploaded!")
-		#click submit and wait for post request to be finalized
-		driver.find_element_by_id("finish-button").click()
-		wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"channel-banner")))
-		print()
-		print("Video published!")
+		try:
+			if yt.description !=None:
+				driver.find_element_by_name("upload_description").send_keys(yt.description)
+		except selenium.common.exceptions.WebDriverException as e:
+				#change to strip BMP (emojis) out of yt.description
+				driver.find_element_by_name("upload_description").send_keys("no description")
+		while(tries >= 10)
+			try:		
+				#upload video and wait for progess to finish
+				#!!! Find way to go to relative path
+				driver.find_element_by_id("fileupload").send_keys("D:\\coding projects\\YTRobinHood\\downloads\\video.mp4")
+				wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"progress")))
+				print("Uploading video....")
+				uploadWait.until(EC.invisibility_of_element_located((By.CLASS_NAME,"progress")))
+				print("video uploaded!")
+				#upload thumbnal and wait for progess to finish
+				#!!! Find way to go to relative path
+				driver.find_element_by_id("fileupload").send_keys("D:\\coding projects\\YTRobinHood\\downloads\\thumbnail.jpg")
+				wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"progress")))
+				print("Uploading thumbnail....")
+				uploadWait.until(EC.invisibility_of_element_located((By.CLASS_NAME,"progress")))
+				print("thumbnail uploaded!")
+				#click submit and wait for post request to be finalized
+				driver.find_element_by_id("finish-button").click()
+				wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"channel-banner")))
+				print()
+				print("Video published!")
+				break
+			except selenium.common.exceptions.TimeoutException as timeout
+				tries += 1
+				continue
 		driver.quit()
 
 
