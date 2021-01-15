@@ -106,7 +106,7 @@ def upload(yt,options,user,password):
 		except selenium.common.exceptions.WebDriverException as e:
 				#change to strip BMP (emojis) out of yt.description
 				driver.find_element_by_name("upload_description").send_keys("no description")
-		while(tries >= 10)
+		while(tries >= 10):
 			try:		
 				#upload video and wait for progess to finish
 				#!!! Find way to go to relative path
@@ -128,7 +128,7 @@ def upload(yt,options,user,password):
 				print()
 				print("Video published!")
 				break
-			except selenium.common.exceptions.TimeoutException as timeout
+			except selenium.common.exceptions.TimeoutException as timeout:
 				tries += 1
 				continue
 		driver.quit()
