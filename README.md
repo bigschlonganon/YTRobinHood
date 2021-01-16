@@ -2,7 +2,11 @@
 Youtube porting script
 
 # Quick and dirty edition 
-Just make sure you have all the depencies installed 
+Just make sure you have all the depencies installed including chrome driver which can 
+be found here: https://chromedriver.chromium.org/downloads
+Chrome driver is dependand on your version of chrome you can check which version of chrome
+you are currently running by typing ' chrome://version ' in your chrome browser
+
 Make sure you keep your downloads folder and links.txt in the root folder of the python file
 
 Change the filepaths to your location for the downloads folder and change your user and 
