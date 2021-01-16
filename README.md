@@ -16,6 +16,6 @@ i'll fix this shortly on top of the two exceptions that plague me
 youtube descriptions can have emojis which gives an exception
 and sometimes the wait fails and doesnt find the desired element for some reason 
 
-#What i hope to add
+# What i hope to add
 dynamic paths on top of the user input
 hopefully get this out as a standdalone tool so the less programming inclined anons can also start working with this.
