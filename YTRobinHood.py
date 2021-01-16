@@ -5,10 +5,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import ElementClickInterceptedException
 import pytube
 import requests
 import time
 import os, glob
+import os.path
+from os import path
 
 #Currently not used issues with session throws [ER1101] from requests
 def site_login(options,user,password):
@@ -27,6 +30,12 @@ def site_login(options,user,password):
 	return session_id
 	driver.quit()
 	print("logged in")
+
+def fileStructureInit():
+	if not os.path.exists('downloads'):
+		os.mkdir('downloads')
+	if not os.path.exists("links.txt"):
+		file = open("links.txt", "w") 
 		
 def cleanUp():
 	dir = 'downloads'
@@ -56,7 +65,7 @@ def gatherLinks(options):
 	driver = webdriver.Chrome(options=options)
 	driver.get(baseurl)
 	for link in driver.find_elements_by_tag_name('a'):
-		if "watch" in str(link.get_attribute('href')):
+		if "watch?v=" in str(link.get_attribute('href')):
 			links.append(link.get_attribute('href'))
 	driver.quit()
 
@@ -83,7 +92,8 @@ def download(link):
 
 def upload(yt,options,user,password):
 	if yt != None:
-		tries = 10
+		tries = 0
+		submitTries = 0
 		#Login code 
 		driver = webdriver.Chrome(options=options)
 		driver.get ("https://www.bitchute.com/")
@@ -108,7 +118,7 @@ def upload(yt,options,user,password):
 		except WebDriverException as bmp:
 				#change to strip BMP (emojis) out of yt.description
 				driver.find_element_by_name("upload_description").send_keys("no description")
-		while(tries >= 10):
+		while(tries <= 10):
 			try:		
 				#upload video and wait for progess to finish
 				#!!! Find way to go to relative path
@@ -124,12 +134,20 @@ def upload(yt,options,user,password):
 				print("Uploading thumbnail....")
 				uploadWait.until(EC.invisibility_of_element_located((By.CLASS_NAME,"progress")))
 				print("thumbnail uploaded!")
-				#click submit and wait for post request to be finalized
-				#intecept exception happening here ???
-				driver.find_element_by_id("finish-button").click()
-				wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"channel-banner")))
-				print()
-				print("Video published!")
+				
+				while(submitTries <= 10):
+					try:
+						#click submit and wait for post request to be finalized
+						#intecept exception happening here ???
+						driver.find_element_by_id("finish-button").click()
+						wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"channel-banner")))
+						print()
+						print("Video published!")
+						break
+					except ElementClickInterceptedException as timeout:
+						submitTries += 1
+						print("trying again............")
+						continue
 				break
 			except TimeoutException as timeout:
 				tries += 1
@@ -140,17 +158,31 @@ def upload(yt,options,user,password):
 
 user = "user"
 password = "password"
-
 #Make depended on input for scraping channels
 #!!! Might require a .click() more button for channels
-baseurl = "https://www.youtube.com/feed/trending"
 
 links =[]
+fileStructureInit()
+
+q1 = input("have you setup your login? Y | N: ")
+if q1 == "N" or q1 == "n":
+	user =input("enter your bitchute username or email: ")
+	password = input("enter your bitchute password: ")
+q2 = input("enter the youtube channel URL you want to use: ")
+if "www.youtube.com/c/" in str(q2):
+	baseurl = q2
+	print("Gathering videos from: "+str(q2))
+else:
+	baseurl = "https://www.youtube.com/feed/trending"
+	print("the url you entered is incorrect")
+	print()
+	print("starting scraper with youtube trending page close the CLI if you wish to try again")
+	time.sleep(3)
+	
+
 while(1):
 	links =[]
 	gatherLinks(webdriverInit())
-	#Build in one time check to make sure downloads folder and links.txt are present
-
 	for link in links: 
 		if checkFile(link):
 			yt = download(link)
