@@ -3,6 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import WebDriverException
 import pytube
 import requests
 import time
@@ -103,7 +105,7 @@ def upload(yt,options,user,password):
 		try:
 			if yt.description !=None:
 				driver.find_element_by_name("upload_description").send_keys(yt.description)
-		except selenium.common.exceptions.WebDriverException as e:
+		except WebDriverException as bmp:
 				#change to strip BMP (emojis) out of yt.description
 				driver.find_element_by_name("upload_description").send_keys("no description")
 		while(tries >= 10):
@@ -123,13 +125,15 @@ def upload(yt,options,user,password):
 				uploadWait.until(EC.invisibility_of_element_located((By.CLASS_NAME,"progress")))
 				print("thumbnail uploaded!")
 				#click submit and wait for post request to be finalized
+				#intecept exception happening here ???
 				driver.find_element_by_id("finish-button").click()
 				wait.until(EC.visibility_of_element_located((By.CLASS_NAME,"channel-banner")))
 				print()
 				print("Video published!")
 				break
-			except selenium.common.exceptions.TimeoutException as timeout:
+			except TimeoutException as timeout:
 				tries += 1
+				print("trying again............")
 				continue
 		driver.quit()
 
