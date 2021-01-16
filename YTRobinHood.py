@@ -94,24 +94,32 @@ def upload(yt,options,user,password):
 	if yt != None:
 		tries = 0
 		submitTries = 0
-		#Login code 
+		loginTries = 0
 		driver = webdriver.Chrome(options=options)
-		driver.get ("https://www.bitchute.com/")
 		wait = WebDriverWait (driver, 20)
 		uploadWait = WebDriverWait (driver, 300)
-		loginButton = driver.find_element_by_css_selector('.unauth-link a')
-		loginButton.click()
-		wait.until(EC.visibility_of_element_located((By.ID,"id_username")))
-		driver.find_element_by_id("id_username").send_keys(user)
-		driver.find_element_by_id ("id_password").send_keys(password)
-		driver.find_element_by_id("auth_submit").click()
-		print("logged in!")
-		#UPLOAD CODE
-		wait.until(EC.visibility_of_element_located((By.ID,"userdropdown")))
-		uploadButton = driver.find_element_by_xpath('//*[@id="nav-top-menu"]/div[2]/div[4]/a')
-		uploadButton.click()
-		wait.until(EC.visibility_of_element_located((By.ID,"upload_description")))
-		driver.find_element_by_name("upload_title").send_keys(yt.title)
+		while(loginTries <= 10):
+			try:
+				#Login code 
+				driver.get ("https://www.bitchute.com/")
+				loginButton = driver.find_element_by_css_selector('.unauth-link a')
+				loginButton.click()
+				wait.until(EC.visibility_of_element_located((By.ID,"id_username")))
+				driver.find_element_by_id("id_username").send_keys(user)
+				driver.find_element_by_id ("id_password").send_keys(password)
+				driver.find_element_by_id("auth_submit").click()
+				print("logged in!")
+				#UPLOAD CODE
+				wait.until(EC.visibility_of_element_located((By.ID,"userdropdown")))
+				uploadButton = driver.find_element_by_xpath('//*[@id="nav-top-menu"]/div[2]/div[4]/a')
+				uploadButton.click()
+				wait.until(EC.visibility_of_element_located((By.ID,"upload_description")))
+				driver.find_element_by_name("upload_title").send_keys(yt.title)
+				break
+			except TimeoutException as timeout:
+				loginTries += 1
+				print("trying again............")
+				continue 
 		try:
 			if yt.description !=None:
 				driver.find_element_by_name("upload_description").send_keys(yt.description)
@@ -146,6 +154,7 @@ def upload(yt,options,user,password):
 						break
 					except ElementClickInterceptedException as timeout:
 						submitTries += 1
+						time.sleep(1)
 						print("trying again............")
 						continue
 				break
